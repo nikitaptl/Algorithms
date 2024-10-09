@@ -1,0 +1,56 @@
+var patternMap map[rune]int
+
+func initPatternMap(pattern string) {
+	patternMap = make(map[rune]int)
+	for _, r := range pattern {
+		patternMap[r]++
+	}
+}
+
+func checkInclusion(pattern string, s string) bool {
+	initPatternMap(pattern)
+	lenPattern := len([]rune(pattern))
+	lenMap := len(patternMap)
+
+	// creating map
+	symMap := make(map[rune]int)
+	for k, v := range patternMap {
+		symMap[k] = v
+	}
+	// How much is left to search for a pattern
+	k := lenMap
+	start := 0
+	str := []rune(s)
+	for end := 0; end < len(str); end++ {
+		if end-start+1 > lenPattern {
+			sym := str[start]
+			if symMap[sym] == 0 {
+				k++
+			}
+			if symMap[sym]++; symMap[sym] == 0 {
+				k--
+			}
+			start++
+		}
+		sym := str[end]
+		if _, ok := patternMap[sym]; !ok {
+			k = lenMap
+			start = end + 1
+			for k, v := range patternMap {
+				symMap[k] = v
+			}
+		} else {
+			if symMap[sym] == 0 {
+				k++
+			}
+			symMap[sym]--
+			if symMap[sym] == 0 {
+				k--
+			}
+			if k == 0 {
+				return true
+			}
+		}
+	}
+	return false
+}
