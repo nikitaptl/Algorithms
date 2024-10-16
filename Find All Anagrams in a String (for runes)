@@ -1,0 +1,77 @@
+type Counter struct {
+	Set     map[rune]int
+	CurrSet map[rune]int
+	Req     int
+}
+
+func (c *Counter) buildSet(p string) {
+	c.Set = make(map[rune]int)
+	c.CurrSet = make(map[rune]int)
+	for _, r := range p {
+		c.Set[r]++
+	}
+	c.clear()
+}
+
+func (c *Counter) clear() {
+	c.Req = len(c.Set)
+	for key, value := range c.Set {
+		c.CurrSet[key] = value
+	}
+}
+
+func (c *Counter) isAnagram() bool {
+	return c.Req == 0
+}
+
+func (c *Counter) add(r rune) {
+	if c.CurrSet[r] == 0 {
+		c.Req++
+	}
+	c.CurrSet[r]--
+	if c.CurrSet[r] == 0 {
+		c.Req--
+	}
+}
+
+func (c *Counter) delete(r rune) {
+	if c.CurrSet[r] == 0 {
+		c.Req++
+	}
+	c.CurrSet[r]++
+	if c.CurrSet[r] == 0 {
+		c.Req--
+	}
+}
+
+func (c *Counter) inSet(r rune) bool {
+	_, ok := c.Set[r]
+	return ok
+}
+
+func findAnagrams(s string, p string) []int {
+	var counter Counter
+	counter.buildSet(p)
+
+	n, k := len(s), len(p)
+	start := 0
+	str := []rune(s)
+	result := make([]int, 0)
+	for end := 0; end < n; end++ {
+		if end-start+1 > k {
+			counter.delete(str[start])
+			start++
+		}
+		sym := str[end]
+		if !counter.inSet(sym) {
+			counter.clear()
+			start = end + 1
+		} else {
+			counter.add(sym)
+			if counter.isAnagram() {
+				result = append(result, start)
+			}
+		}
+	}
+	return result
+}
