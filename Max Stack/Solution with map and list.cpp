@@ -2,36 +2,42 @@ class MaxStack {
 public:
     MaxStack() {
     }
-    
+
     void push(int x) {
-        ch = stack.empty() ? 0 : stack.rbegin()->first + 1;
-        stack.insert({ch, x});
-        maxStack.insert({x, ch});
+        list.push_back(x);
+        map[x].push(--list.end());
     }
-    
+
     int pop() {
-        auto [index, x] = *stack.rbegin();
-        maxStack.erase({x, index});
-        stack.erase({index, x});
+        auto iter = --list.end();
+        int x = *iter;
+        map[x].pop();
+        list.pop_back();
+        if (map[x].empty()) {
+            map.erase(x);
+        }
         return x;
     }
-    
+
     int top() {
-        return stack.rbegin()->second;
+        return list.back();
     }
-    
+
     int peekMax() {
-        return maxStack.rbegin()->first;
+        return map.begin()->first;
     }
-    
+
     int popMax() {
-        auto [x, index] = *maxStack.rbegin();
-        stack.erase({index, x});
-        maxStack.erase({x, index});
+        int x = map.begin()->first;
+        auto& stack = map.begin()->second;
+        list.erase(stack.top());
+        stack.pop();
+        if (stack.empty()) {
+            map.erase(x);
+        }
         return x;
     }
 private:
-    set<pair<int, int>> stack;
-    set<pair<int, int>> maxStack;
-    int ch = 0;
+    map<int, stack<list<int>::iterator>, greater<int>> map;
+    list<int> list;
 };
